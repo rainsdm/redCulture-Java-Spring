@@ -5,6 +5,9 @@ target/
 !**/src/test/**/target/
 /logs/
 
+### SQLs ###
+**/redculture_*-dump.sql
+
 ### STS ###
 .apt_generated
 .classpath
