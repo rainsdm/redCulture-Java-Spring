@@ -12,8 +12,8 @@ public class SshProperties {
     private String host;
     private int port;
     private String username;
-    private String password;
     private String remoteHost;
+    private String privateKey;
     private int remotePort;
     private int localPort;
 }
