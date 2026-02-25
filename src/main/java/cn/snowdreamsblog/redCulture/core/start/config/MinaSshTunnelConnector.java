@@ -10,7 +10,6 @@ import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
 import org.apache.sshd.common.util.net.SshdSocketAddress;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -19,9 +18,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Configuration
 public class MinaSshTunnelConnector {
     private final SshProperties sshProperties;
+    private final AtomicBoolean isClosed = new AtomicBoolean(false);
     private SshClient sshClient;
     private ClientSession session;
-    private final AtomicBoolean isClosed = new AtomicBoolean(false);
 
     public MinaSshTunnelConnector(SshProperties properties) {
         this.sshProperties = properties;
@@ -40,9 +39,9 @@ public class MinaSshTunnelConnector {
 
             // 建立会话
             session = sshClient.connect(
-                    sshProperties.getUsername(),
-                    sshProperties.getHost(),
-                    sshProperties.getPort()
+                            sshProperties.getUsername(),
+                            sshProperties.getHost(),
+                            sshProperties.getPort()
                     )
                     .verify(Duration.ofSeconds(10))
                     .getSession();
@@ -88,7 +87,7 @@ public class MinaSshTunnelConnector {
 
         Thread cleanupThread = new Thread(() -> {
             try {
-                if (session != null &&  session.isOpen()) {
+                if (session != null && session.isOpen()) {
                     // 立即发送关闭请求，不等待缓冲区刷新完成。
                     session.close(true).addListener(future -> {
                         log.info("会话已断开。");
