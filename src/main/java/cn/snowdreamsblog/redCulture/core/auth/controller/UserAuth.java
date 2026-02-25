@@ -1,6 +1,9 @@
 package cn.snowdreamsblog.redCulture.core.auth.controller;
 
 import cn.snowdreamsblog.redCulture.core.auth.dto.request.UserLoginRequest;
+import cn.snowdreamsblog.redCulture.core.auth.dto.response.BaseUserProfileResponse;
+import cn.snowdreamsblog.redCulture.core.auth.service.Login;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,19 +15,21 @@ import java.util.Map;
 
 @RestController
 public class UserAuth {
+    private final Login loginService;
+    @Autowired
+    public UserAuth(Login loginService) {
+        this.loginService = loginService;
+    }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserLoginRequest userLoginRequest) {
-        String username = userLoginRequest.username();
-        String password = userLoginRequest.password();
+    public ResponseEntity<?> login(@RequestBody UserLoginRequest request) {
+        BaseUserProfileResponse profile = loginService.login(request.username(), request.password());
 
-        // 模拟业务逻辑验证
-        if ("123456".equals(username) && "123456".equals(password)) {
-//            return "登录成功";
-            return ResponseEntity.ok(Map.of("message", "欢迎光临"));
+        if ("登录成功".equals(profile.getMessages())) {
+            return ResponseEntity.ok(Map.of("message", "登录成功"));
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("message", "用户名或密码错误。"));
+                    .body(Map.of("message", profile.getMessages()));
         }
     }
 }

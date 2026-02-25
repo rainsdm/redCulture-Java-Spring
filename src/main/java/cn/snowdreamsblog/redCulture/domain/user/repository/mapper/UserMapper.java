@@ -10,6 +10,6 @@ public interface UserMapper {
     @Select("SELECT " +
             "user_id, username, password, role, " +
             "points, create_time, last_accessed_time " +
-            "FROM users")
+            "FROM users WHERE username = #{username}")
     UserPo selectUserByUsername(String username);
 }
