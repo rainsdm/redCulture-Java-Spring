@@ -5,17 +5,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 供数据库查询层使用的持久化模型。不涉及与网络传输层的交互。
+ * 用于返回基本的用户信息。建议作为core.auth的DTO-response返回。
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserPo {
+public class BaseUserProfilePo {
     private String userId;
     private String username;
-    private String password;
     private long role;
     private long points;
-    private java.sql.Timestamp createTime;
-    private java.sql.Timestamp lastAccessedTime;
 }
