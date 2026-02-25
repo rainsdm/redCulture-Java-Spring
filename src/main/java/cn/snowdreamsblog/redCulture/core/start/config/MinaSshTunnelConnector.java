@@ -13,13 +13,15 @@ import org.springframework.context.annotation.Configuration;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Log4j2
 @Configuration
 public class MinaSshTunnelConnector {
     private final SshProperties sshProperties;
-    private SshClient SshClient;
+    private SshClient sshClient;
     private ClientSession session;
+    private final AtomicBoolean isClosed = new AtomicBoolean(false);
 
     public MinaSshTunnelConnector(SshProperties properties) {
         this.sshProperties = properties;
@@ -28,16 +30,16 @@ public class MinaSshTunnelConnector {
     @PostConstruct
     public void start() {
         try {
-            SshClient = new SshClient();
-            SshClient.setServerKeyVerifier(AcceptAllServerKeyVerifier.INSTANCE); // 忽略服务器指纹检查
+            sshClient = SshClient.setUpDefaultClient();
+            sshClient.setServerKeyVerifier(AcceptAllServerKeyVerifier.INSTANCE); // 忽略服务器指纹检查
 
             FileKeyPairProvider fileKeyPairProvider = new FileKeyPairProvider(Paths.get(sshProperties.getPrivateKey()));
-            SshClient.setKeyIdentityProvider(fileKeyPairProvider);
+            sshClient.setKeyIdentityProvider(fileKeyPairProvider);
 
-            SshClient.start();
+            sshClient.start();
 
             // 建立会话
-            session = SshClient.connect(
+            session = sshClient.connect(
                     sshProperties.getUsername(),
                     sshProperties.getHost(),
                     sshProperties.getPort()
@@ -64,32 +66,53 @@ public class MinaSshTunnelConnector {
             );
 
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                if (SshClient != null && SshClient.isStarted()) {
+                if (sshClient != null && sshClient.isStarted()) {
                     log.warn("检测到JVM退出信号，正在清理ssh连接。");
                     this.shutdown();
                 }
             }));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            log.error("SSH 隧道初始化失败，准备回滚资源", e);
+            this.shutdown(); // 启动失败时主动清理可能已开启的线程池，且无论其抛出什么异常，都执行这一步。
+            throw new RuntimeException("SSH 隧道初始化失败", e);
         }
     }
 
     @PreDestroy
     public void shutdown() {
+        // 验证并发，确保逻辑具有幂等性
+        if (!isClosed.compareAndSet(false, true)) {
+            return;
+        }
         log.info("开始安全退出SSH...");
+
+        Thread cleanupThread = new Thread(() -> {
+            try {
+                if (session != null &&  session.isOpen()) {
+                    // 立即发送关闭请求，不等待缓冲区刷新完成。
+                    session.close(true).addListener(future -> {
+                        log.info("会话已断开。");
+                    });
+                }
+                if (sshClient != null && sshClient.isStarted()) {
+                    sshClient.stop();
+                    log.info("SSH 客户端已停止，端口映射已解除。");
+                }
+            } catch (Exception e) {
+                log.error("安全退出时发生异常，尝试强制回收资源。", e);
+            }
+        });
+
+        cleanupThread.start();
+
         try {
-            if (session != null &&  session.isOpen()) {
-                // 立即发送关闭请求，不等待缓冲区刷新完成。
-                session.close(true).addListener(future -> {
-                    log.info("会话已端开。");
-                });
+            // 设定 2 秒超时，防止网络死锁导致 JVM 无法退出
+            cleanupThread.join(2000);
+            if (cleanupThread.isAlive()) {
+                log.warn("SSH 资源清理任务超时，放弃等待，交由系统强制回收。");
             }
-            if (SshClient != null && SshClient.isStarted()) {
-                SshClient.stop();
-                log.info("SSH 客户端已停止，端口映射已解除。");
-            }
-        } catch (Exception e) {
-            log.error("安全退出时发生异常，尝试强制回收资源。", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 }
