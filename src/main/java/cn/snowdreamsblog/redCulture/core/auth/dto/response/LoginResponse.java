@@ -1,10 +1,7 @@
 package cn.snowdreamsblog.redCulture.core.auth.dto.response;
 
 import cn.snowdreamsblog.redCulture.core.auth.dto.response.login.LoginData;
-import cn.snowdreamsblog.redCulture.core.auth.dto.response.login.Security;
-import cn.snowdreamsblog.redCulture.core.auth.dto.response.login.User;
 
-import java.util.regex.Pattern;
 import java.util.Objects;
 
 public record LoginResponse(

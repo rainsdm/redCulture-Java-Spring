@@ -7,15 +7,12 @@ import cn.snowdreamsblog.redCulture.core.auth.dto.response.login.LoginData;
 import cn.snowdreamsblog.redCulture.core.auth.dto.response.login.Security;
 import cn.snowdreamsblog.redCulture.core.auth.dto.response.login.User;
 import cn.snowdreamsblog.redCulture.core.auth.service.Login;
-import cn.snowdreamsblog.redCulture.domain.user.repository.po.UserPo;
-import cn.snowdreamsblog.redCulture.utils.jwt.JwtConfig;
 import cn.snowdreamsblog.redCulture.utils.jwt.JwtUtilJose4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
@@ -26,6 +23,7 @@ import java.util.Map;
 public class UserAuth {
     private final Login loginService;
     private final JwtUtilJose4j jwtUtilJose4j;
+
     @Autowired
     public UserAuth(Login loginService, JwtUtilJose4j jwtUtilJose4j) {
         this.loginService = loginService;
@@ -62,7 +60,7 @@ public class UserAuth {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(
                             Map.of(
-                            "code", 401, "msg", profile.getMessages()
+                                    "code", 401, "msg", profile.getMessages()
                             )
                     );
         }
