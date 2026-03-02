@@ -2,6 +2,10 @@ package cn.snowdreamsblog.redCulture.core.auth.controller;
 
 import cn.snowdreamsblog.redCulture.core.auth.dto.request.UserLoginRequest;
 import cn.snowdreamsblog.redCulture.core.auth.dto.response.BaseUserProfileResponse;
+import cn.snowdreamsblog.redCulture.core.auth.dto.response.LoginResponse;
+import cn.snowdreamsblog.redCulture.core.auth.dto.response.login.LoginData;
+import cn.snowdreamsblog.redCulture.core.auth.dto.response.login.Security;
+import cn.snowdreamsblog.redCulture.core.auth.dto.response.login.User;
 import cn.snowdreamsblog.redCulture.core.auth.service.Login;
 import cn.snowdreamsblog.redCulture.domain.user.repository.po.UserPo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,12 +39,28 @@ public class UserAuth {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             String validUntil = LocalDateTime.now().plusHours(1).format(formatter);
 
-            UserPo user = new UserPo(
-                    profile.
+            User user = new User(
+                    profile.getUsername(),
+                    (int) profile.getPoints()
             );
+
+            Security security = new Security(
+                    profile.getUserId(),
+                    (int) profile.getRole(),
+                    validUntil
+            );
+
+            LoginData  loginData = new LoginData(accessToken, user, security);
+            LoginResponse response = new LoginResponse(200, "登录成功", loginData);
+
+            return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("message", profile.getMessages()));
+                    .body(
+                            Map.of(
+                            "code", 401, "msg", profile.getMessages()
+                            )
+                    );
         }
     }
 
