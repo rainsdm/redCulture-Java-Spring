@@ -50,7 +50,7 @@ public class UserAuth {
                     validUntil
             );
 
-            LoginData  loginData = new LoginData(accessToken, user, security);
+            LoginData loginData = new LoginData(accessToken, user, security);
             LoginResponse response = new LoginResponse(200, "登录成功", loginData);
 
             return ResponseEntity.ok(response);
