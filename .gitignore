@@ -5,6 +5,7 @@ target/
 !**/src/test/**/target/
 /logs/
 application.*
+src/main/java/cn/snowdreamsblog/redCulture/docs/javadoc/
 
 ### SQLs ###
 **/redculture_*-dump.sql

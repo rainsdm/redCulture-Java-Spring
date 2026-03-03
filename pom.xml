@@ -185,6 +185,37 @@
                     </excludes>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.12.0</version>
+                <configuration>
+                    <additionalOptions>
+                        <additionalOption>-Xdoclint:none</additionalOption>
+                    </additionalOptions>
+                    <encoding>UTF-8</encoding>
+                    <charset>UTF-8</charset>
+                    <docencoding>UTF-8</docencoding>
+
+                    <show>private</show>
+                    <author>true</author>
+                    <version>true</version>
+                    <release>25</release>
+
+                    <detectLinks>true</detectLinks>
+                    <detectJavaApiLink>true</detectJavaApiLink>
+                    <links>
+                        <link>https://docs.oracle.com/en/java/javase/25/docs/api/</link>
+                        <link>file:///G:/Development_Environment/Java/jdk-25//api</link>
+                    </links>
+
+                    <includeDependencySources>false</includeDependencySources>
+
+                    <outputDirectory>${project.basedir}/src/main/java/cn/snowdreamsblog/redCulture/docs/javadoc</outputDirectory>
+
+                    <failOnError>true</failOnError>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
