@@ -15,8 +15,7 @@ public class Register {
     }
 
     public BaseUserProfileResponse register(UserAuthRequest request) {
-        UserPo userExists = userMapper.selectUserByUsername(request.username());
-        if (userExists != null) {
+        if (userExists(request.username())) {
             return new BaseUserProfileResponse("用户名已存在");
         }
         int registerNum = userMapper.insertGeneralUser(request.username(), request.password());
@@ -29,5 +28,14 @@ public class Register {
                 userPo.getUserId(), userPo.getUsername(),
                 userPo.getRole(), userPo.getPoints(), "注册成功"
         );
+    }
+
+    /**
+     * 判断用户名是否存在。
+     * @param username 用于判断的用户名。
+     * @return 存在返回true, 不存在返回false。
+     */
+    private boolean userExists(String username) {
+        return userMapper.selectUserByUsername(username) != null;
     }
 }
