@@ -22,6 +22,7 @@ public class Login {
             return new BaseUserProfileResponse("密码错误");
         }
 
+        userMapper.setLoginTime(userPo.getUserId());
         return new BaseUserProfileResponse(
                 userPo.getUserId(), userPo.getUsername(),
                 userPo.getRole(), userPo.getPoints(), "登录成功"

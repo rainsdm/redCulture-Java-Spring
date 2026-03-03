@@ -12,7 +12,7 @@ use redCulture;
 # 其中，X表示数值0 - 9，每一个X表示一个数值。
 create table if not exists users
 (
-    user_id            varchar(4) primary key comment "用户ID（格式: G001，A01。其中，数字的长度要严格按示例限定）",
+    user_id            varchar(4) primary key default '' comment "用户ID（格式: G001，A01。其中，数字的长度要严格按示例限定。默认值为空表示由触发器控制）",
     username           varchar(50)  not null comment "用户名",
     password           varchar(255) not null comment "密码",
     role               int      default 1 comment "角色。值为1是普通用户，值为0是管理员",

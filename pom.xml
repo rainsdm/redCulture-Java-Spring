@@ -10,7 +10,7 @@
     </parent>
     <groupId>cn.snowdreamsblog</groupId>
     <artifactId>redCulture</artifactId>
-    <version>0.5.8</version>
+    <version>0.5.9</version>
     <name>redCulture</name>
     <description>大连东软信息学院 - 大一第三学期期末项目</description>
     <url/>
