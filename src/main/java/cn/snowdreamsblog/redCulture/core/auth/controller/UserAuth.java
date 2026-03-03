@@ -79,7 +79,9 @@ public class UserAuth {
         }
 
         if ("用户名已存在".equals(successMsg)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                    Map.of("code", 409, "msg", successMsg)
+            );
         }
 
         // 兜底处理：所有不明确的状态统一归为 401 或 400
